@@ -7,7 +7,7 @@ def get_requirements()->List[str]:
     """
     requirement_list:List[str]= []
 
-    # Write fn to read from requiremnets.txt file and convert into a list.
+    # Write fn to read from requiremnets.txt file and convert into a list.  
     return requirement_list
 
 setup(
