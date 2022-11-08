@@ -49,14 +49,22 @@ class DataIngestion:
 
     def split_data_into_train_test(self, dataframe: DataFrame) -> None:
         try:
-            train_set,test_set = train_test_split(dataframe, test_size=self.data_ingestion_config.train_test_split_ration)
+            train_set, test_set = train_test_split(
+                dataframe, test_size=self.data_ingestion_config.train_test_split_ration
+            )
             logging.info("Performed train test split on the dataframe")
             dir_path = os.path.dirname(self.data_ingestion_config.training_filepath)
             os.makedirs(dir_path, exist_ok=True)
 
-            train_set.to_csv(self.data_ingestion_config.training_filepath, index= False, header=True)
-            test_set.to_csv(self.data_ingestion_config.testing_filepath, index= False, header=True)
-            logging.info("Exported train and test files after splitting to {self.data_ingestion_config.training_filepath}")
+            train_set.to_csv(
+                self.data_ingestion_config.training_filepath, index=False, header=True
+            )
+            test_set.to_csv(
+                self.data_ingestion_config.testing_filepath, index=False, header=True
+            )
+            logging.info(
+                "Exported train and test files after splitting to {self.data_ingestion_config.training_filepath}"
+            )
 
         except Exception as e:
             raise SensorException(e, sys)

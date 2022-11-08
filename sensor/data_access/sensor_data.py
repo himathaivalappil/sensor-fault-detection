@@ -7,6 +7,7 @@ from sensor.exception import SensorException
 from sensor.configuration.mongo_db_connection import MongoDBClient
 from sensor.constant.database import DATABASE_NAME
 
+
 class SensorData:
     """
     This class helps to export entire mongodb record as pandas dataframe
@@ -23,7 +24,9 @@ class SensorData:
         except Exception as e:
             raise SensorException(e, sys)
 
-    def export_collection_as_dataframe(self, collection_name:str, database_name: Optional[str]=None)->pd.DataFrame:
+    def export_collection_as_dataframe(
+        self, collection_name: str, database_name: Optional[str] = None
+    ) -> pd.DataFrame:
         """_summary_
 
         Args:
@@ -46,12 +49,9 @@ class SensorData:
             if "_id" in df.columns.to_list():
                 df.drop(columns=["_id"], axis=1)
                 logging.info("Removed column _id from table")
-            df.replace({"na":np.nan}, inplace=True)
+            df.replace({"na": np.nan}, inplace=True)
             logging.info("Replaced all na values with np.nan values")
             return df
 
         except Exception as e:
-            raise SensorException(e,sys)
-
-
-
+            raise SensorException(e, sys)
