@@ -44,7 +44,7 @@ class SensorData:
                 collection = self.mongo_client.database[collection_name]
             else:
                 collection = self.mongo_client[database_name][collection_name]
-
+            print(collection.find())
             df = pd.DataFrame(list(collection.find()))
             if "_id" in df.columns.to_list():
                 df.drop(columns=["_id"], axis=1)
