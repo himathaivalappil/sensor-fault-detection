@@ -1,56 +1,62 @@
-import os, sys
+import sys
+from typing import Optional
+
 import numpy as np
 import pandas as pd
-from typing import Optional
-from sensor.logger import logging
-from sensor.exception import SensorException
+import json
 from sensor.configuration.mongo_db_connection import MongoDBClient
-from sensor.constant.database import DATABASE_NAME
+from sensor.constant.database import DATABASE_NAME, MONGO_DB_URL
+from sensor.exception import SensorException
 
 
 class SensorData:
     """
-    This class helps to export entire mongodb record as pandas dataframe
+    This class help to export entire mongo db record as pandas dataframe
     """
 
     def __init__(self):
-        """_summary_
-
-        Raises:
-            SensorException: _description_
+        """
         """
         try:
-            self.mongo_client = MongoDBClient(DATABASE_NAME)
+            self.mongo_client = MongoDBClient(database_name=DATABASE_NAME)
+
         except Exception as e:
             raise SensorException(e, sys)
 
-    def export_collection_as_dataframe(
-        self, collection_name: str, database_name: Optional[str] = None
-    ) -> pd.DataFrame:
-        """_summary_
 
-        Args:
-            collection_name (str): _description_
-            database_name (Optional[str], optional): _description_. Defaults to None.
-
-        Raises:
-            SensorException: _description_
-
-        Returns:
-            pd.DataFrame: _description_
-        """
+    def save_csv_file(self,file_path ,collection_name: str, database_name: Optional[str] = None):
         try:
+            data_frame=pd.read_csv(file_path)
+            data_frame.reset_index(drop=True, inplace=True)
+            records = list(json.loads(data_frame.T.to_json()).values())
             if database_name is None:
                 collection = self.mongo_client.database[collection_name]
             else:
                 collection = self.mongo_client[database_name][collection_name]
-            print(collection.find())
+            collection.insert_many(records)
+            return len(records)
+        except Exception as e:
+            raise SensorException(e, sys)
+
+
+    def export_collection_as_dataframe(
+        self, collection_name: str, database_name: Optional[str] = None) -> pd.DataFrame:
+        try:
+            """
+            export entire collectin as dataframe:
+            return pd.DataFrame of collection
+            """
+            if database_name is None:
+                collection = self.mongo_client.database[collection_name]
+            else:
+                collection = self.mongo_client[database_name][collection_name]
             df = pd.DataFrame(list(collection.find()))
+
             if "_id" in df.columns.to_list():
-                df.drop(columns=["_id"], axis=1)
-                logging.info("Removed column _id from table")
+                df = df.drop(columns=["_id"], axis=1)
+
             df.replace({"na": np.nan}, inplace=True)
-            logging.info("Replaced all na values with np.nan values")
+
             return df
 
         except Exception as e:
